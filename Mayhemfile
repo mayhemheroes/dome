@@ -1,5 +1,5 @@
 project: rnshah9/dome
-target: dome
+target: embed
 
 cmds:
   - cmd: /repo/src/tools/embed @@
