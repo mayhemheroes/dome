@@ -1,4 +1,4 @@
-project: rnshah9/dome
+project: dome
 target: embed
 
 cmds:
