@@ -1,0 +1,5 @@
+project: dome
+target: embed
+
+cmds:
+  - cmd: /embed @@
