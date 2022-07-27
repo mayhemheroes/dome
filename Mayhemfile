@@ -2,4 +2,4 @@ project: dome
 target: embed
 
 cmds:
-  - cmd: /repo/src/tools/embed @@
+  - cmd: /embed @@
