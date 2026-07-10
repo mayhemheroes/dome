@@ -20,7 +20,10 @@ The DOME repository is managed using a variation of [Git Flow](https://www.atlas
 
 ### Submitting a Pull Request
 
-Once you finish working on your feature, you should create a pull request, targeting the `develop` branch of the repository.
+Once you finish working on your feature, you should create a pull request, targeting the `develop` branch of the repository. 
+
+Please disclose in the pull request whether you have used LLM/AI-based tools to assist in your contribution, as this has an impact on project licensing.
+
 Your code will be checked for code style, presence of documentation if necessary as well as whether your changes match the project Design Philosophy.
 When these things have been checked, your changes will be merged.
 
