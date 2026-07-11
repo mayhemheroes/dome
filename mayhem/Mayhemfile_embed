@@ -1,0 +1,34 @@
+project: dome
+target: embed
+
+# File-input (CLI) target: feed the fuzz bytes as a source file to DOME's `embed` tool — the small
+# self-contained converter that reads a source file and encodes its bytes into a generated C include
+# file (the build step that turns *.wren modules into compilable C arrays). embed-standalone.c reads
+# args[1] as a file (EMBED_readEntireFile) and EMBED_encode()s it; that read + encode path is the
+# fuzz surface. Not libFuzzer: the embed binary IS the natural fuzz surface and its own single-input
+# reproducer. @@ is the input-file placeholder.
+#
+# Ported from the OLD mayhemheroes integration's single target (old Mayhemfile: target embed running
+# `/embed` on the input file; old Dockerfile.mayhem built the engine with `make` but copied out only
+# src/tools/embed). Same target NAME and shape, now pointed at the base-image build output under
+# /mayhem and built directly from src/tools/embed-standalone.c (no SDL, no Wren VM — see build.sh).
+#
+# We pass an explicit [moduleName] [destinationFile] (`wren_module_test /dev/null`) so the fuzzer
+# exercises the CONTENT path: EMBED_readEntireFile(@@) → EMBED_encode() over the input BYTES, writing
+# the generated C array to /dev/null. That is the real, content-dependent fuzz surface (the encoder
+# that walks every byte of the input). It also keeps the run side-effect-free (no `<input>.inc`
+# artifact beside each input).
+#
+# WHY NOT the bare `/embed @@` of the old target: with no destination, main() builds the default
+# `<input>.inc` via `strcat(strdup(fileName), ".inc")` (embed-standalone.c:78) — strdup allocates only
+# strlen(path)+1 bytes, so the strcat of ".inc" overflows the heap buffer. ASan flags it, BUT it
+# triggers on the INPUT PATH (constant per run), identically for EVERY input regardless of the fuzzed
+# bytes — so it crashes even the seed, gives Mayhem no passing baseline to mutate, and masks the
+# encoder. It's a real but path-keyed defect (trivially reproducible by hand, not content-fuzzed), so
+# we steer the target past it to fuzz the byte-processing encoder, the surface the old `embed` target
+# was actually after. (Reproduce the strcat overflow directly with: `/mayhem/embed <anyfile>`.)
+cmds:
+  - cmd: /mayhem/embed @@ wren_module_test /dev/null
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/embed/testsuite
